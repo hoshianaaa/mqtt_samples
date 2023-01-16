@@ -1,0 +1,1 @@
+mosquitto_pub -h localhost -t drone/001 -m "Hello Drone!"
