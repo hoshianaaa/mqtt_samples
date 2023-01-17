@@ -1,4 +1,4 @@
-#!usr/bin/env python
+#!usr/bin/env python3
 # -*- coding: utf-8 -*- 
 
 import paho.mqtt.client as mqtt     # MQTTのライブラリをインポート
@@ -25,6 +25,12 @@ def mqtt_pub(msg):
 
 def data_callback(msg):
   print(msg)
+  string = ""
+  data = msg.data
+  for d in data:
+    string = string + str(d) + ","
+
+  mqtt_pub(string[:-1])
 
 # メイン関数   この関数は末尾のif文から呼び出される
 client = mqtt.Client()                 # クラスのインスタンス(実体)の作成
@@ -34,16 +40,12 @@ client.on_publish = on_publish         # メッセージ送信時のコールバ
 
 client.connect("localhost", 1883, 60)  # 接続先は自分自身
 
-# 通信処理スタート
 client.loop_start()    # subはloop_forever()だが，pubはloop_start()で起動だけさせる
 
 rospy.init_node("ros_mqtt_bridge")
-rospy.Subscriber("data", UInt8MultiArray, data_callback)
-
-# 永久に繰り返す
-msg = "255" * 4000
+rospy.Subscriber("data", Int32MultiArray, data_callback)
 
 r = rospy.Rate(100)
 
-while True:
+while not rospy.is_shutdown():
   r.sleep()
