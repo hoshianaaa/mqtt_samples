@@ -21,7 +21,8 @@ def on_publish(client, userdata, mid):
 
 def mqtt_pub(msg):
   global client
-  client.publish("aaa/bbb",msg)    # トピック名とメッセージを決めて送信
+  global mqtt_topic
+  client.publish(mqtt_topic,msg)    # トピック名とメッセージを決めて送信
 
 def data_callback(msg):
   print(msg)
@@ -32,6 +33,11 @@ def data_callback(msg):
 
   mqtt_pub(string[:-1])
 
+rospy.init_node("ros_mqtt_bridge")
+rospy.Subscriber("data", Int32MultiArray, data_callback)
+
+mqtt_topic = rospy.get_param("/ros_mqtt_bridge/mqtt_topic", "topic")
+
 # メイン関数   この関数は末尾のif文から呼び出される
 client = mqtt.Client()                 # クラスのインスタンス(実体)の作成
 client.on_connect = on_connect         # 接続時のコールバック関数を登録
@@ -41,9 +47,6 @@ client.on_publish = on_publish         # メッセージ送信時のコールバ
 client.connect("localhost", 1883, 60)  # 接続先は自分自身
 
 client.loop_start()    # subはloop_forever()だが，pubはloop_start()で起動だけさせる
-
-rospy.init_node("ros_mqtt_bridge")
-rospy.Subscriber("data", Int32MultiArray, data_callback)
 
 r = rospy.Rate(100)
 
